@@ -1,30 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/home/arthur/Documentos/projetos/minimal-api/minimal-api.csproj": {}
+    "/home/arthur/Documentos/projetos/dio/minimal-api/minimal-api.csproj": {}
   },
   "projects": {
-    "/home/arthur/Documentos/projetos/minimal-api/minimal-api.csproj": {
+    "/home/arthur/Documentos/projetos/dio/minimal-api/minimal-api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/arthur/Documentos/projetos/minimal-api/minimal-api.csproj",
+        "projectUniqueName": "/home/arthur/Documentos/projetos/dio/minimal-api/minimal-api.csproj",
         "projectName": "minimal-api",
-        "projectPath": "/home/arthur/Documentos/projetos/minimal-api/minimal-api.csproj",
+        "projectPath": "/home/arthur/Documentos/projetos/dio/minimal-api/minimal-api.csproj",
         "packagesPath": "/home/arthur/.nuget/packages/",
-        "outputPath": "/home/arthur/Documentos/projetos/minimal-api/obj/",
+        "outputPath": "/home/arthur/Documentos/projetos/dio/minimal-api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/arthur/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net8.0"
+          "net9.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
+          "net9.0": {
+            "targetAlias": "net9.0",
             "projectReferences": {}
           }
         },
@@ -37,25 +38,30 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
+        "net9.0": {
+          "targetAlias": "net9.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.10, )"
+              "version": "[9.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.10, )"
+              "version": "[9.0.0, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
-              "version": "[8.0.2, )"
+              "version": "[9.0.0-preview.2.efcore.9.0.0, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[7.2.0, )"
             }
           },
           "imports": [
@@ -77,7 +83,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/9.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

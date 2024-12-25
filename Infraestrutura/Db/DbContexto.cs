@@ -12,6 +12,7 @@ public class DbContxto: DbContext
         _configuracaoAppSettings = configuracaoAppSettings;
     }
     public DbSet<Administrador> Administrador { get; set; } = default!;
+    public DbSet<Veiculo> Veiculos { get; set; } = default!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
