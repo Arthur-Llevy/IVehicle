@@ -1,9 +1,12 @@
+using System.Security.Cryptography.X509Certificates;
+using api.DTOs;
 using API.Dominio.Enteidades;
 using API.Dominio.Intercaces;
 using API.Dominio.Servicos;
 using API.DTOs;
 using API.DTOs.ModelViews;
 using API.Infraestrutura.Contexto;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,28 +20,60 @@ builder.Services.AddDbContext<DbContxto>(options =>
     );
 });
 
-builder.Services.AddScoped<IVeiculoServico, VeiculoServico>();
+builder.Services.AddScoped<IVeiculoInterface, VeiculoServico>();
+builder.Services.AddScoped<IAdministradorInterface, AdministradorServico>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
 app.MapGet("/", () => Results.Json(new Home()));
 
-app.MapPost("/login", (LoginDTO loginDTO) => 
+ErrosDeValidacao Validar(VeiculoDTO veiculo)
 {
-    if (loginDTO.Email == "adm@teste.com" && loginDTO.Senha == "123456")
+    var validacao = new ErrosDeValidacao
+
     {
-        return Results.Ok("Login com sucesso");
-    }
+        Mensagens = new List<string>()
+    };
+
+    if (string.IsNullOrEmpty(veiculo.Nome))
+        validacao.Mensagens.Add("O nome não pode ser vazio.");
+
+    if (string.IsNullOrEmpty(veiculo.Marca))
+        validacao.Mensagens.Add("A marca não pode ser vazio.");
+
+    if (veiculo.Ano <= 1950)
+        validacao.Mensagens.Add("Por favor, insira um ano válido.");
+
+   return validacao;
+}
+
+app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministradorInterface adiministradorServico) => 
+{   
+    bool validacao = adiministradorServico.Login(loginDTO);
+
+    if (validacao)
+        return Results.Ok();
 
     return Results.Unauthorized();
 }).WithTags("Login");
 
-app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculo, IVeiculoServico veiculoServico) => 
+app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, IAdministradorInterface adiministradorServico) => 
 {
+    var novoAdministrador = adiministradorServico.Incluir(administradorDTO);
+
+    return Results.Ok(novoAdministrador);
+}).WithTags("Administrador");
+
+app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculo, IVeiculoInterface veiculoServico) => 
+{
+    var validacao = Validar(veiculo);  
+
+    if (validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
+
     Veiculo novoVeiculo = new Veiculo 
     {
         Nome = veiculo.Nome,
@@ -50,7 +85,7 @@ app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculo, IVeiculoServico veiculoS
     return Results.Created($"/veiculo/{novoVeiculo.Id}", veiculo);
 }).WithTags("Veiculo");
 
-app.MapGet("/veiculo/", ([FromQuery] int? pagina, IVeiculoServico veiculoServico) => 
+app.MapGet("/veiculo/", ([FromQuery] int? pagina, IVeiculoInterface veiculoServico) => 
 {   
     if (pagina != null)
     {
@@ -60,7 +95,7 @@ app.MapGet("/veiculo/", ([FromQuery] int? pagina, IVeiculoServico veiculoServico
     return Results.Ok(veiculoServico.Todos(0));
 }).WithTags("Veiculo");
 
-app.MapGet("/veiculo/{id}", ([FromQuery] int id, IVeiculoServico veiculoServico) => 
+app.MapGet("/veiculo/{id}", ([FromQuery] int id, IVeiculoInterface veiculoServico) => 
 {
     var veiculo = veiculoServico.BuscaPorId(id);
 
@@ -71,14 +106,19 @@ app.MapGet("/veiculo/{id}", ([FromQuery] int id, IVeiculoServico veiculoServico)
     return Results.Ok(veiculo);
 }).WithTags("Veiculo");
 
-app.MapPatch("/veiculo/{id}", ([FromQuery] int Id, [FromBody] VeiculoDTO veiculo, IVeiculoServico veiculoServico) => 
+app.MapPatch("/veiculo/{id}", ([FromQuery] int Id, [FromBody] VeiculoDTO veiculo, IVeiculoInterface veiculoServico) => 
 {
+    var validacao = Validar(veiculo);  
+
+    if (validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
+    
     veiculoServico.Atualizar(Id, veiculo);
 
     return Results.NoContent();
 }).WithTags("Veiculo");
 
-app.MapDelete("/veiculo", ([FromQuery] int Id, IVeiculoServico veiculoServico) => 
+app.MapDelete("/veiculo", ([FromQuery] int Id, IVeiculoInterface veiculoServico) => 
 {   
     veiculoServico.Excluir(Id);
 

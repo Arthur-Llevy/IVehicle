@@ -1,4 +1,4 @@
-namespace API.DTOs.ModelViews;
+namespace API.DTOs;
 
 public class VeiculoDTO 
 {

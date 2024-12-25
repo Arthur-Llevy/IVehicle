@@ -1,13 +1,11 @@
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using API.Dominio.Enteidades;
 using API.Dominio.Intercaces;
-using API.DTOs.ModelViews;
+using API.DTOs;
 using API.Infraestrutura.Contexto;
 
 namespace API.Dominio.Servicos;
 
-public class VeiculoServico : IVeiculoServico
+public class VeiculoServico : IVeiculoInterface
 {
     private readonly DbContxto _contexto;
     public VeiculoServico (DbContxto contexto) 

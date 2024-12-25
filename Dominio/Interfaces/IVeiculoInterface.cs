@@ -1,9 +1,9 @@
 using API.Dominio.Enteidades;
-using API.DTOs.ModelViews;
+using API.DTOs;
 
 namespace API.Dominio.Intercaces;
 
-public interface IVeiculoServico
+public interface IVeiculoInterface
 {
     List<Veiculo>? Todos (int? pagina = 1, string? nome = null, string? marca = null);
     Veiculo? BuscaPorId (int id);
