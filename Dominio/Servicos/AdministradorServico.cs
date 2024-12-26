@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using api.DTOs;
 using API.Dominio.Enteidades;
 using API.DTOs;
@@ -12,6 +13,29 @@ public class AdministradorServico : IAdministradorInterface
     public AdministradorServico(DbContxto contexto)
     {
         _contexto = contexto;
+    }
+    public List<Administrador> Todos ()
+    {
+        return _contexto.Administradores.ToList(); 
+    }
+
+    public Administrador PegarPorId (int id)
+    {
+        var administrador = _contexto.Administradores.Where(x => x.Id == id).FirstOrDefault();
+
+        return administrador;
+    }
+
+    public void Excluir (int id)
+    {
+        var administradorParaEcluir = _contexto.Administradores.Where(x => x.Id == id).FirstOrDefault();
+
+        if (administradorParaEcluir != null)
+        {
+            _contexto.Administradores.Remove(administradorParaEcluir);
+            _contexto.SaveChanges();
+        }
+
     }
     public Administrador Incluir(AdministradorDTO administradorDTO)
     {

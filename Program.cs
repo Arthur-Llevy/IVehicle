@@ -6,7 +6,6 @@ using API.Dominio.Servicos;
 using API.DTOs;
 using API.DTOs.ModelViews;
 using API.Infraestrutura.Contexto;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +49,22 @@ ErrosDeValidacao Validar(VeiculoDTO veiculo)
    return validacao;
 }
 
+app.MapGet("/administradores", (IAdministradorInterface administradorServico) => 
+{   
+    var adms = administradorServico.Todos();
+    List<AdministradorModelView> results = new List<AdministradorModelView>();
+
+    foreach (Administrador adm in adms)
+    {
+        results.Add(new AdministradorModelView
+        {
+            Email = adm.Email,
+            Id = adm.Id
+        });
+    }
+    return Results.Ok(results);
+}).WithTags("Administrador");
+
 app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministradorInterface adiministradorServico) => 
 {   
     bool validacao = adiministradorServico.Login(loginDTO);
@@ -59,6 +74,24 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministra
 
     return Results.Unauthorized();
 }).WithTags("Login");
+
+app.MapGet("/administradores/{id}", (int id, IAdministradorInterface administradorServico) => 
+{
+    var administrador = administradorServico.PegarPorId(id);
+    AdministradorModelView adm = new AdministradorModelView 
+    {
+        Email = administrador.Email,
+        Id = administrador.Id
+    };
+
+    return Results.Ok(adm);
+}).WithTags("Administrador");
+
+app.MapDelete("/administradores/{id}", (int id, IAdministradorInterface administradorServico) => 
+{
+    administradorServico.Excluir(id);
+    return Results.Ok();
+}).WithTags("Administrador");
 
 app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, IAdministradorInterface adiministradorServico) => 
 {
