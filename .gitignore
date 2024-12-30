@@ -1,2 +1,5 @@
-/bin
-/obj
+/Api/bin
+/Api/obh
+
+/Test/bin
+/Test/obh
