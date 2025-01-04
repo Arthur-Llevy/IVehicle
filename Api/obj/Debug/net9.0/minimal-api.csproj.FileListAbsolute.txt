@@ -130,3 +130,5 @@
 /home/arthur/Documentos/projetos/dio/minimal-api/Api/obj/Debug/net9.0/minimal-api.pdb
 /home/arthur/Documentos/projetos/dio/minimal-api/Api/obj/Debug/net9.0/minimal-api.genruntimeconfig.cache
 /home/arthur/Documentos/projetos/dio/minimal-api/Api/obj/Debug/net9.0/ref/minimal-api.dll
+/home/arthur/Documentos/projetos/dio/minimal-api/Api/bin/Debug/net9.0/Scalar.AspNetCore.dll
+/home/arthur/Documentos/projetos/dio/minimal-api/Api/bin/Debug/net9.0/Microsoft.AspNetCore.OpenApi.dll

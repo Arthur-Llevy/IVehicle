@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
+using Microsoft.AspNetCore.OpenApi;
 
 public class Program 
 {
@@ -36,6 +38,7 @@ public class Program
             });
         });
 
+        builder.Services.AddOpenApi();
         builder.Services.AddAuthorization();
 
         builder.Services.AddScoped<IVeiculoInterface, VeiculoServico>();
@@ -263,8 +266,8 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseSwagger();
-        app.UseSwaggerUI();
+        app.MapOpenApi();
+        app.MapScalarApiReference();
         app.Run();
     }
 }
