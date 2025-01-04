@@ -54,21 +54,20 @@ public class Program
                 Description = "Bearer {token}"
             }); 
 
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference
+                    new OpenApiSecurityScheme
                     {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new string[] { }
-            }
-        });
-
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
+            });
         });
 
         var key = builder.Configuration.GetSection("Jwt").ToString();
@@ -96,10 +95,9 @@ public class Program
         ErrosDeValidacao Validar(VeiculoDTO veiculo)
         {
             var validacao = new ErrosDeValidacao
-
-            {
-                Mensagens = new List<string>()
-            };
+                {
+                    Mensagens = new List<string>()
+                };
 
             if (string.IsNullOrEmpty(veiculo.Nome))
                 validacao.Mensagens.Add("O nome não pode ser vazio.");
@@ -110,7 +108,7 @@ public class Program
             if (veiculo.Ano <= 1950)
                 validacao.Mensagens.Add("Por favor, insira um ano válido.");
 
-        return validacao;
+            return validacao;
         }
 
         string GerarToken(Administrador administrador)
@@ -135,9 +133,9 @@ public class Program
             return string.Empty;
         }
 
-        app.MapGet("/administradores", (IAdministradorInterface administradorServico) => 
+        app.MapGet("/administradores", async (IAdministradorInterface administradorServico) => 
         {   
-            var adms = administradorServico.Todos();
+            var adms = await administradorServico.Todos();
             List<AdministradorModelView> results = new List<AdministradorModelView>();
 
             foreach (Administrador adm in adms)
@@ -149,11 +147,11 @@ public class Program
                 });
             }
             return Results.Ok(results);
-        }).WithTags("Administrador");
+        }).WithTags("Administrador").RequireAuthorization();
 
-        app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministradorInterface adiministradorServico) => 
+        app.MapPost("/administradores/login", async ([FromBody] LoginDTO loginDTO, IAdministradorInterface adiministradorServico) => 
         {   
-            var adm = adiministradorServico.Login(loginDTO);
+            var adm = await adiministradorServico.Login(loginDTO);
 
             if (adm != null) {
                 string token = GerarToken(adm);
@@ -166,29 +164,43 @@ public class Program
             return Results.Unauthorized();
         }).WithTags("Login");
 
-        app.MapGet("/administradores/{id}", (int id, IAdministradorInterface administradorServico) => 
+        app.MapGet("/administradores/{id}", async (int id, IAdministradorInterface administradorServico) => 
         {
-            var administrador = administradorServico.PegarPorId(id);
-            AdministradorModelView adm = new AdministradorModelView 
+            var administrador = await administradorServico.PegarPorId(id);
+            if (administrador != null)
             {
-                Email = administrador.Email,
-                Id = administrador.Id
-            };
+                AdministradorModelView adm = new AdministradorModelView 
+                {
+                    Email = administrador.Email,
+                    Id = administrador.Id
+                };
+                return Results.Ok(adm);
+            }
+            return Results.NotFound();
+        }).WithTags("Administrador").RequireAuthorization();
 
-            return Results.Ok(adm);
+        app.MapDelete("/administradores/{id}", async (int id, IAdministradorInterface administradorServico) => 
+        {
+            try 
+            {
+                await administradorServico.Excluir(id);
+                return Results.NoContent();
+            } catch (InvalidOperationException error)
+            {
+                return Results.BadRequest(error);
+            }
         }).WithTags("Administrador");
 
-        app.MapDelete("/administradores/{id}", (int id, IAdministradorInterface administradorServico) => 
+        app.MapPost("/administradores", async ([FromBody] AdministradorDTO administradorDTO, IAdministradorInterface adiministradorServico) => 
         {
-            administradorServico.Excluir(id);
-            return Results.Ok();
-        }).WithTags("Administrador");
-
-        app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, IAdministradorInterface adiministradorServico) => 
-        {
-            var novoAdministrador = adiministradorServico.Incluir(administradorDTO);
-
-            return Results.Ok(novoAdministrador);
+            try 
+            {
+                var novoAdministrador = await adiministradorServico.Incluir(administradorDTO);
+                return Results.Ok(novoAdministrador);
+            } catch (InvalidOperationException error)
+            {
+                return Results.BadRequest($"Falha ao criar um novo administrador: ${error}");
+            }
         }).WithTags("Administrador");
 
         app.MapPost("/veiculo", ([FromBody] VeiculoDTO veiculo, IVeiculoInterface veiculoServico) => 
@@ -207,7 +219,7 @@ public class Program
             veiculoServico.Incluir(novoVeiculo);
 
             return Results.Created($"/veiculo/{novoVeiculo.Id}", veiculo);
-        }).WithTags("Veiculo");
+        }).WithTags("Veiculo").RequireAuthorization();
 
         app.MapGet("/veiculo/", ([FromQuery] int? pagina, IVeiculoInterface veiculoServico) => 
         {   
@@ -228,9 +240,9 @@ public class Program
                 return Results.NotFound();
             }
             return Results.Ok(veiculo);
-        }).WithTags("Veiculo");
+        }).WithTags("Veiculo").RequireAuthorization();
 
-        app.MapPatch("/veiculo/{id}", ([FromQuery] int Id, [FromBody] VeiculoDTO veiculo, IVeiculoInterface veiculoServico) => 
+        app.MapPatch("/veiculo/{id}", (int Id, [FromBody] VeiculoDTO veiculo, IVeiculoInterface veiculoServico) => 
         {
             var validacao = Validar(veiculo);  
 
@@ -240,14 +252,14 @@ public class Program
             veiculoServico.Atualizar(Id, veiculo);
 
             return Results.NoContent();
-        }).WithTags("Veiculo");
+        }).WithTags("Veiculo").RequireAuthorization();
 
-        app.MapDelete("/veiculo", ([FromQuery] int Id, IVeiculoInterface veiculoServico) => 
+        app.MapDelete("/veiculo/{id}", (int Id, IVeiculoInterface veiculoServico) => 
         {   
             veiculoServico.Excluir(Id);
 
             return Results.NoContent();
-        }).WithTags("Veiculo");
+        }).WithTags("Veiculo").RequireAuthorization();
 
         app.UseAuthentication();
         app.UseAuthorization();

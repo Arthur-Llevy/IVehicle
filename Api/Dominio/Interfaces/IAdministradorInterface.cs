@@ -5,9 +5,9 @@ namespace api.DTOs;
 
 public interface IAdministradorInterface
 {
-    Administrador Incluir (AdministradorDTO administradorDTO);
-    Administrador Login (LoginDTO loginDTO);
-    List<Administrador> Todos ();
-    Administrador PegarPorId (int id);
-    void Excluir (int Id);
+    Task<Administrador> Incluir (AdministradorDTO administradorDTO);
+    Task<Administrador> Login (LoginDTO loginDTO);
+    Task<List<Administrador>> Todos ();
+    Task<Administrador> PegarPorId (int id);
+    Task Excluir (int Id);
 }

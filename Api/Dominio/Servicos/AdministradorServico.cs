@@ -3,6 +3,7 @@ using api.DTOs;
 using API.Dominio.Enteidades;
 using API.DTOs;
 using API.Infraestrutura.Contexto;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Dominio.Servicos;
 
@@ -14,45 +15,50 @@ public class AdministradorServico : IAdministradorInterface
     {
         _contexto = contexto;
     }
-    public List<Administrador> Todos ()
+    public async Task<List<Administrador>> Todos ()
     {
-        return _contexto.Administradores.ToList(); 
+        return await _contexto.Administradores.ToListAsync(); 
     }
 
-    public Administrador PegarPorId (int id)
+    public async Task<Administrador> PegarPorId (int id)
     {
-        var administrador = _contexto.Administradores.Where(x => x.Id == id).FirstOrDefault();
+        var administrador = await _contexto.Administradores.Where(x => x.Id == id).FirstOrDefaultAsync();
 
         return administrador;
     }
 
-    public void Excluir (int id)
+    public async Task Excluir (int id)
     {
-        var administradorParaEcluir = _contexto.Administradores.Where(x => x.Id == id).FirstOrDefault();
-
+        var administradorParaEcluir = await _contexto.Administradores.Where(x => x.Id == id).FirstOrDefaultAsync();
         if (administradorParaEcluir != null)
         {
             _contexto.Administradores.Remove(administradorParaEcluir);
-            _contexto.SaveChanges();
+            await _contexto.SaveChangesAsync();
         }
-
+        throw new InvalidOperationException("Não existe este administrador no sistema.");
     }
-    public Administrador Incluir(AdministradorDTO administradorDTO)
+    public async Task<Administrador> Incluir(AdministradorDTO administradorDTO)
     {
-        var novoAdministrador = new Administrador();
-        novoAdministrador.Email = administradorDTO.Email;
-        novoAdministrador.Perfil = administradorDTO.Perfil;
-        novoAdministrador.Senha = administradorDTO.Senha;
-        
-        _contexto.Administradores.Add(novoAdministrador);
-        _contexto.SaveChanges();
+        var busca = await _contexto.Administradores.Where(x => x.Email == administradorDTO.Email).FirstOrDefaultAsync();
 
-        return novoAdministrador;
+        if (busca == null)
+        {
+            var novoAdministrador = new Administrador();
+            novoAdministrador.Email = administradorDTO.Email;
+            novoAdministrador.Perfil = administradorDTO.Perfil;
+            novoAdministrador.Senha = administradorDTO.Senha;
+            
+            _contexto.Administradores.Add(novoAdministrador);
+            await _contexto.SaveChangesAsync();
+
+            return novoAdministrador;
+        } 
+        throw new InvalidOperationException("Um administrador com esse e-mail já está cadastrado");
     }
 
-    public Administrador Login (LoginDTO loginDTO)
+    public async Task<Administrador> Login (LoginDTO loginDTO)
     {
-        var administrador = _contexto.Administradores.Where(x => x.Email == loginDTO.Email && x.Senha == loginDTO.Senha).FirstOrDefault();
+        var administrador = await _contexto.Administradores.Where(x => x.Email == loginDTO.Email && x.Senha == loginDTO.Senha).FirstOrDefaultAsync();
 
         return administrador;
     }
